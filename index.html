@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Produktif & Fokus</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Header / Navigasi -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500 text-white p-2 rounded-xl shadow-md">
+                    <i class="fa-solid fa-bolt text-lg"></i>
+                </div>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-brand-600 to-emerald-500 bg-clip-text text-transparent">
+                    FocusFlow Dashboard
+                </h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Clock / Tanggal -->
+                <div class="hidden sm:flex flex-col text-right">
+                    <span id="current-time" class="text-sm font-semibold">00:00:00</span>
+                    <span id="current-date" class="text-xs text-slate-400">Senin, 1 Jan 2026</span>
+                </div>
+                <!-- Tombol Mode Gelap -->
+                <button id="theme-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Kolom Kiri & Tengah: Tugas (Task Manager) -->
+        <section class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-brand-500 text-lg"></i>
+                    <h2 class="text-lg font-bold">Daftar Tugas (To-Do List)</h2>
+                </div>
+                <span id="task-counter" class="text-xs bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 font-semibold px-2.5 py-1 rounded-full">0 selesai</span>
+            </div>
+
+            <!-- Form Tambah Tugas -->
+            <form id="task-form" class="flex gap-2 mb-4">
+                <input type="text" id="task-input" placeholder="Tulis tugas baru di sini..." required
+                    class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm">
+                <button type="submit" class="bg-brand-500 hover:bg-brand-600 text-white font-medium px-5 py-2.5 rounded-xl text-sm transition flex items-center space-x-2 shadow-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Tambah</span>
+                </button>
+            </form>
+
+            <!-- Filter Tugas -->
+            <div class="flex space-x-2 mb-4 border-b border-slate-200 dark:border-slate-700 pb-3 text-sm">
+                <button type="button" data-filter="all" class="filter-btn px-3 py-1.5 rounded-lg font-medium bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 transition">Semua</button>
+                <button type="button" data-filter="active" class="filter-btn px-3 py-1.5 rounded-lg font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">Belum</button>
+                <button type="button" data-filter="completed" class="filter-btn px-3 py-1.5 rounded-lg font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition">Selesai</button>
+            </div>
+
+            <!-- Daftar List Tugas -->
+            <div class="flex-1 overflow-y-auto max-h-[350px] space-y-2 pr-1" id="task-list">
+                <!-- Data Tugas akan dirender lewat JavaScript -->
+            </div>
+        </section>
+
+        <!-- Kolom Kanan: Timer Pomodoro & Catatan Cepat -->
+        <div class="space-y-6 flex flex-col">
+            
+            <!-- Pomodoro Timer -->
+            <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center">
+                <div class="w-full flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-clock text-amber-500 text-lg"></i>
+                        <h2 class="text-lg font-bold">Fokus Timer</h2>
+                    </div>
+                </div>
+
+                <!-- Pilihan Mode Timer -->
+                <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl mb-6 w-full text-xs font-medium">
+                    <button id="mode-pomodoro" onclick="setTimerMode('pomodoro', 25)" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition">Fokus (25m)</button>
+                    <button id="mode-short" onclick="setTimerMode('short', 5)" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 transition">Istirahat (5m)</button>
+                    <button id="mode-long" onclick="setTimerMode('long', 15)" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 transition">Panjang (15m)</button>
+                </div>
+
+                <!-- Tampilan Waktu -->
+                <div id="timer-display" class="text-5xl font-extrabold tracking-wider my-4 font-mono text-slate-900 dark:text-slate-100">
+                    25:00
+                </div>
+
+                <!-- Kontrol Timer -->
+                <div class="flex space-x-3 w-full">
+                    <button id="timer-start-btn" onclick="toggleTimer()" class="flex-1 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm">
+                        Mulai
+                    </button>
+                    <button onclick="resetTimer()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl text-sm transition">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Catatan Cepat (Quick Notes) -->
+            <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col flex-1">
+                <div class="flex items-center space-x-2 mb-3">
+                    <i class="fa-solid fa-note-sticky text-emerald-500 text-lg"></i>
+                    <h2 class="text-lg font-bold">Catatan Cepat</h2>
+                </div>
+                <textarea id="quick-note" placeholder="Tulis ide atau catatan cepat di sini..." 
+                    class="w-full flex-1 min-h-[120px] p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm resize-none"></textarea>
+                <div class="text-right mt-2">
+                    <span id="note-status" class="text-xs text-slate-400">Tersimpan otomatis</span>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-4 text-center text-xs text-slate-400">
+        &copy; 2026 FocusFlow Dashboard. Siap diunggah ke GitHub.
+    </footer>
+
+    <!-- JavaScript Logika Aplikasi -->
+    <script>
+        // --- 1. Mode Gelap (Dark Mode) ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const htmlElement = document.documentElement;
+
+        function updateThemeIcon() {
+            if (htmlElement.classList.contains('dark')) {
+                themeIcon.className = 'fa-solid fa-sun';
+            } else {
+                themeIcon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            htmlElement.classList.add('dark');
+        } else {
+            htmlElement.classList.remove('dark');
+        }
+        updateThemeIcon();
+
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            if (htmlElement.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+            updateThemeIcon();
+        });
+
+        // --- 2. Jam & Tanggal Realtime ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID');
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 3. Manajemen Tugas (To-Do List) ---
+        let tasks = JSON.parse(localStorage.getItem('focus_tasks')) || [
+            { id: 1, text: 'Pelajari dasar Git & GitHub', completed: true },
+            { id: 2, text: 'Unggah file HTML ini ke repository baru', completed: false }
+        ];
+        let currentFilter = 'all';
+
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        const taskCounter = document.getElementById('task-counter');
+
+        function saveTasks() {
+            localStorage.setItem('focus_tasks', JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            
+            let filteredTasks = tasks.filter(task => {
+                if (currentFilter === 'active') return !task.completed;
+                if (currentFilter === 'completed') return task.completed;
+                return true;
+            });
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `<div class="text-center py-8 text-slate-400 text-sm">Tidak ada tugas ditemukan.</div>`;
+            } else {
+                filteredTasks.forEach(task => {
+                    const div = document.createElement('div');
+                    div.className = `flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition ${task.completed ? 'opacity-60 bg-slate-50 dark:bg-slate-900/50' : ''}`;
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-3 overflow-hidden">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})"
+                                class="w-4 h-4 text-brand-500 rounded border-slate-300 dark:border-slate-600 focus:ring-brand-500 cursor-pointer">
+                            <span class="text-sm truncate ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">${escapeHtml(task.text)}</span>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="text-slate-400 hover:text-red-500 p-1.5 transition">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    `;
+                    taskList.appendChild(div);
+                });
+            }
+
+            const completedCount = tasks.filter(t => t.completed).length;
+            taskCounter.textContent = `${completedCount} selesai dari ${tasks.length}`;
+        }
+
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = taskInput.value.trim();
+            if (text) {
+                tasks.push({ id: Date.now(), text, completed: false });
+                taskInput.value = '';
+                saveTasks();
+                renderTasks();
+            }
+        });
+
+        window.toggleTask = function(id) {
+            tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+            saveTasks();
+            renderTasks();
+        }
+
+        window.deleteTask = function(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveTasks();
+            renderTasks();
+        }
+
+        // Filter button clicks
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.className = 'filter-btn px-3 py-1.5 rounded-lg font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition';
+                });
+                e.target.className = 'filter-btn px-3 py-1.5 rounded-lg font-medium bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 transition';
+                currentFilter = e.target.getAttribute('data-filter');
+                renderTasks();
+            });
+        });
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        renderTasks();
+
+        // --- 4. Pomodoro Timer ---
+        let timerMinutes = 25;
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const timerDisplay = document.getElementById('timer-display');
+        const timerStartBtn = document.getElementById('timer-start-btn');
+
+        function updateTimerDisplay() {
+            const m = String(timerMinutes).padStart(2, '0');
+            const s = String(timerSeconds).padStart(2, '0');
+            timerDisplay.textContent = `${m}:${s}`;
+        }
+
+        window.setTimerMode = function(mode, mins) {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerStartBtn.textContent = 'Mulai';
+            timerStartBtn.className = 'flex-1 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm';
+            
+            timerMinutes = mins;
+            timerSeconds = 0;
+            updateTimerDisplay();
+
+            // Style buttons
+            ['pomodoro', 'short', 'long'].forEach(m => {
+                const el = document.getElementById(`mode-${m}`);
+                if (m === mode) {
+                    el.className = 'flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm transition font-semibold text-brand-600 dark:text-brand-400';
+                } else {
+                    el.className = 'flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 transition';
+                }
+            });
+        }
+
+        window.toggleTimer = function() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                timerStartBtn.textContent = 'Lanjutkan';
+                timerStartBtn.className = 'flex-1 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm';
+            } else {
+                isRunning = true;
+                timerStartBtn.textContent = 'Jeda';
+                timerStartBtn.className = 'flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm';
+                
+                timerInterval = setInterval(() => {
+                    if (timerSeconds === 0) {
+                        if (timerMinutes === 0) {
+                            clearInterval(timerInterval);
+                            isRunning = false;
+                            alert('Waktu habis! Kerja bagus.');
+                            timerStartBtn.textContent = 'Mulai';
+                            return;
+                        }
+                        timerMinutes--;
+                        timerSeconds = 59;
+                    } else {
+                        timerSeconds--;
+                    }
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        window.resetTimer = function() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerStartBtn.textContent = 'Mulai';
+            timerStartBtn.className = 'flex-1 bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm';
+            // Reset to default pomodoro
+            timerMinutes = 25;
+            timerSeconds = 0;
+            updateTimerDisplay();
+        }
+
+        // --- 5. Catatan Cepat (Quick Notes) ---
+        const quickNote = document.getElementById('quick-note');
+        const noteStatus = document.getElementById('note-status');
+        
+        quickNote.value = localStorage.getItem('focus_quick_note') || '';
+
+        quickNote.addEventListener('input', () => {
+            localStorage.setItem('focus_quick_note', quickNote.value);
+            noteStatus.textContent = 'Menyimpan...';
+            setTimeout(() => {
+                noteStatus.textContent = 'Tersimpan otomatis';
+            }, 500);
+        });
+    </script>
+</body>
+</html>
